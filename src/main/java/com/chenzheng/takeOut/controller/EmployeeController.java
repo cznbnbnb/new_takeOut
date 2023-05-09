@@ -1,18 +1,14 @@
 package com.chenzheng.takeOut.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chenzheng.takeOut.common.R;
 import com.chenzheng.takeOut.entity.Employee;
 import com.chenzheng.takeOut.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -20,83 +16,78 @@ import java.time.LocalDateTime;
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
+    /**
+     * 处理员工登录请求
+     * @param request HttpServletRequest对象，用于存储登录成功的员工ID
+     * @param employee 包含用户名和密码的Employee对象
+     * @return 如果登录成功，返回R.success，包含Employee对象；否则返回R.error，包含错误信息
+     */
     @PostMapping("/login")
-    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
-        String password = employee.getPassword();
-        password = DigestUtils.md5DigestAsHex(password.getBytes());
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Employee::getUsername,employee.getUsername());
-        Employee emp = employeeService.getOne(queryWrapper);
-        if(null==emp){
-            return R.error("找不到该用户");
+    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee) {
+        Employee emp = employeeService.login(employee);
+        if (emp != null) {
+            request.getSession().setAttribute("employee", emp.getId());
+            return R.success(emp);
+        } else {
+            return R.error("登录失败");
         }
-        if(!emp.getPassword().equals(password)){
-            {
-                return R.error("密码错误");
-            }
-        }
-        if(emp.getStatus()==0){
-            return R.error("该用户已被禁用");
-        }
-        request.getSession().setAttribute("employee",emp.getId());
-        return R.success(emp);
     }
-
+    /**
+     * 处理员工登出请求
+     * @param request HttpServletRequest对象，用于移除登录的员工ID
+     * @return 返回R.success，包含成功信息
+     */
     @PostMapping("/logout")
-    public R<String> logout(HttpServletRequest request){
+    public R<String> logout(HttpServletRequest request) {
         request.getSession().removeAttribute("employee");
         return R.success("退出成功");
     }
-    //新增员工
+
+    /**
+     * 处理保存新员工信息请求
+     * @param request HttpServletRequest对象，用于获取当前登录用户的ID
+     * @param employee 要保存的Employee对象
+     * @return 成功返回R.success，包含成功信息
+     */
     @PostMapping
-    public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
-        log.info("新增员工信息：{}",employee.toString());
-        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        Long empID = (Long)request.getSession().getAttribute("employee");
-        employee.setCreateUser(empID);
-        employee.setUpdateUser(empID);
-        employeeService.save(employee);
-        return R.success("创建新员工成功");
+    public R<String> save(HttpServletRequest request, @RequestBody Employee employee) {
+        return employeeService.saveEmployee(request, employee);
     }
-    //查询信息并分页
+    /**
+     * 处理分页查询员工信息请求
+     * @param page 当前页码
+     * @param pageSize 每页记录数
+     * @param name 员工姓名（模糊查询）
+     * @return 返回R.success，包含查询结果的分页对象
+     */
     @GetMapping("/page")
-    public R<Page> page(int page,int pageSize,String name){
-        log.info("page = {},pageSize = {},name = {}",page,pageSize,name);
-        Page<Employee> pageInfo = new Page(page,pageSize);
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotEmpty(name),Employee::getName,name);
-        employeeService.page(pageInfo,queryWrapper);
+    public R<Page> page(int page, int pageSize, String name) {
+        Page<Employee> pageInfo = employeeService.findEmployeesByPage(page, pageSize, name);
         return R.success(pageInfo);
     }
 
     /**
-     * 根据id修改员工信息
-     * @param request
-     * @param employee
-     * @return
+     * 处理更新员工信息请求
+     * @param request HttpServletRequest对象，用于获取当前登录用户的ID
+     * @param employee 包含更新信息的Employee对象
+     * @return 成功返回R.success，包含成功信息
      */
     @PutMapping
-    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
-        log.info(employee.toString());
-        Long empId = (Long) request.getSession().getAttribute("employee");
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(empId);
-        employeeService.updateById(employee);
-        return R.success("员工信息修改成功");
+    public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
+        return employeeService.updateEmployee(request, employee);
     }
-
+    /**
+     * 根据员工ID查询员工信息
+     * @param id 员工ID
+     * @return 如果找到员工信息，返回R.success，包含Employee对象；否则返回R.error，包含错误信息
+     */
     @GetMapping("/{id}")
-    public R<Employee> getById(@PathVariable Long id){
-        log.info("根据id查询员工信息");
+    public R<Employee> getById(@PathVariable Long id) {
         Employee employee = employeeService.getById(id);
-        if (null != employee){
+        if (null != employee) {
             return R.success(employee);
         }
         return R.error("没有找到员工信息");
     }
-
-
-
 }
+
