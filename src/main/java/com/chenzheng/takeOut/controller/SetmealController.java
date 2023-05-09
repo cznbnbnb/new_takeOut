@@ -58,7 +58,6 @@ public class SetmealController {
             SetmealDto setmealDto = new SetmealDto();
             //复制内核信息
             BeanUtils.copyProperties(item,setmealDto);
-
             Category category = categoryService.getById(item.getCategoryId());
             setmealDto.setCategoryName(category.getName());
             return setmealDto;
