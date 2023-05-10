@@ -74,6 +74,27 @@ public class SetmealController {
         return R.success("套餐删除成功");
     }
 
+    @GetMapping("/{id}")
+    public R<SetmealDto> getSetmealById(@PathVariable Long id) {
+        log.info("通过id获得套餐: {}", id);
+        SetmealDto setmealDto = setmealService.getSetmealDtoById(id);
+        if (setmealDto != null) {
+            return R.success(setmealDto);
+        } else {
+            return R.error("找不到对应的套餐信息");
+        }
+    }
+
+    @PostMapping("/status/{status}")
+    public R<String> updateStatus(@PathVariable Integer status, @RequestParam("ids") List<Long> ids) {
+        log.info("更新套餐状态: {}, ids: {}", status, ids);
+        boolean result = setmealService.updateStatus(ids, status);
+        if (result) {
+            return R.success("更新套餐状态成功");
+        } else {
+            return R.error("更新套餐状态失败");
+        }
+    }
 
 
 

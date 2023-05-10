@@ -1,15 +1,19 @@
 package com.chenzheng.takeOut.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzheng.takeOut.dto.SetmealDto;
+import com.chenzheng.takeOut.entity.Category;
 import com.chenzheng.takeOut.entity.Setmeal;
 import com.chenzheng.takeOut.entity.SetmealDish;
 import com.chenzheng.takeOut.exception.CustomException;
 import com.chenzheng.takeOut.mapper.SetmealMapper;
+import com.chenzheng.takeOut.service.CategoryService;
 import com.chenzheng.takeOut.service.SetmealDishService;
 import com.chenzheng.takeOut.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> implements SetmealService {
     @Autowired
     private SetmealDishService setmealDishService;
+    @Autowired
+    private CategoryService categoryService;
 
     @Override
     @Transactional
@@ -49,6 +55,31 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         LambdaQueryWrapper<SetmealDish> queryWrapper2 = new LambdaQueryWrapper<>();
         queryWrapper2.in(SetmealDish::getSetmealId,ids);
         setmealDishService.remove(queryWrapper2);
-
     }
+    @Override
+    public SetmealDto getSetmealDtoById(Long id) {
+        Setmeal setmeal = this.getById(id);
+        if (setmeal != null) {
+            SetmealDto setmealDto = new SetmealDto();
+            BeanUtils.copyProperties(setmeal, setmealDto);
+            Category category = categoryService.getById(setmeal.getCategoryId());
+            setmealDto.setCategoryName(category.getName());
+            return setmealDto;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean updateStatus(List<Long> ids, Integer status) {
+        if (ids == null || ids.isEmpty() || status == null) {
+            return false;
+        }
+        // 更新所有id在ids列表中的Setmeal的状态
+        LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(Setmeal::getId, ids).set(Setmeal::getStatus, status);
+        return this.update(updateWrapper);
+    }
+
+
 }
