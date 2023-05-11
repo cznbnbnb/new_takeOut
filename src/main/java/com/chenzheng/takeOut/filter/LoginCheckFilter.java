@@ -27,6 +27,10 @@ public class LoginCheckFilter implements Filter {
                 "/employee/login",
                 "/employee/logout",
                 "/backend/**",
+                "/user/login",
+                "/user/sendMsg",
+                "/user/logout",
+                "/front/**",
                 "/common/**"
         };
         boolean check = check(urls,requestURI);
@@ -35,19 +39,17 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request,response);
             return;
         }
-
-        if(request.getSession().getAttribute("employee")!=null){
-            log.info("用户已登录，ID为：{}",request.getSession().getAttribute("employee"));
+        if (request.getSession().getAttribute("employee") != null) {
+            log.info("员工已登录，ID为：{}", request.getSession().getAttribute("employee"));
             Long empId = (Long) request.getSession().getAttribute("employee");
             BaseContext.setCurrentId(empId);
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request, response);
             return;
         }
         log.info("用户未登录");
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
         return;
     }
-
 
     public boolean check(String[] urls,String requestURI){
         for (String url : urls) {
