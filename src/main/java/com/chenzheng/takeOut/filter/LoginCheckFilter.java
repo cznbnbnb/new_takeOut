@@ -45,6 +45,12 @@ public class LoginCheckFilter implements Filter {
             BaseContext.setCurrentId(empId);
             filterChain.doFilter(request, response);
             return;
+        }else if (request.getSession().getAttribute("user") != null) {
+            log.info("用户已登录，ID为：{}", request.getSession().getAttribute("user"));
+            Long userId = (Long) request.getSession().getAttribute("user");
+            BaseContext.setCurrentId(userId);
+            filterChain.doFilter(request, response);
+            return;
         }
         log.info("用户未登录");
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));

@@ -7,6 +7,7 @@ import com.chenzheng.takeOut.common.R;
 import com.chenzheng.takeOut.dto.DishDto;
 import com.chenzheng.takeOut.entity.Category;
 import com.chenzheng.takeOut.entity.Dish;
+import com.chenzheng.takeOut.entity.DishFlavor;
 import com.chenzheng.takeOut.service.CategoryService;
 import com.chenzheng.takeOut.service.DishFlavorService;
 import com.chenzheng.takeOut.service.DishService;
@@ -87,9 +88,9 @@ public class DishController {
 
 
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish){
-        log.info("list categoryId:{}",dish.toString());
-        return dishService.list(dish);
+    public R<List<DishDto>> list(Dish dish){
+        List<DishDto> dishDtoList = dishService.listDishes(dish);
+        return R.success(dishDtoList);
     }
 
 

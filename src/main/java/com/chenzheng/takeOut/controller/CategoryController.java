@@ -55,10 +55,16 @@ public class CategoryController {
         return R.success("修改分类信息成功");
     }
 
+
+    /**
+     * 根据条件查询分类数据
+     * @param category
+     * @return
+     */
     @GetMapping("/list")
     public R<List<Category>> list(Category category){
-        log.info("list category:{}",category.toString());
-        return categoryService.list(category);
+        List<Category> list = categoryService.listCategories(category);
+        return R.success(list);
     }
 
 

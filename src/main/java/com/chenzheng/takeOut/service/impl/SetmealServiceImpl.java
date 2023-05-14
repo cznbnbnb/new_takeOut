@@ -28,6 +28,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     private SetmealDishService setmealDishService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private SetmealService setmealService;
 
     @Override
     @Transactional
@@ -80,6 +82,22 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         updateWrapper.in(Setmeal::getId, ids).set(Setmeal::getStatus, status);
         return this.update(updateWrapper);
     }
+
+    @Override
+    public List<Setmeal> listSetmeals(Long categoryId, Integer status) {
+        //条件构造器
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        //添加条件
+        queryWrapper.eq(categoryId != null, Setmeal::getCategoryId, categoryId);
+        queryWrapper.eq(status != null, Setmeal::getStatus, status);
+        //添加排序条件
+        queryWrapper.orderByAsc(Setmeal::getCreateTime).orderByDesc(Setmeal::getUpdateTime);
+
+        //返回查询结果
+        return this.list(queryWrapper);
+    }
+
+
 
 
 }

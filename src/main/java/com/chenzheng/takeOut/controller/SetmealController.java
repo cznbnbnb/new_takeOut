@@ -96,6 +96,12 @@ public class SetmealController {
         }
     }
 
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(@RequestParam(required = false) Long categoryId, @RequestParam(required = false) Integer status){
+        List<Setmeal> list = setmealService.listSetmeals(categoryId, status);
+        return R.success(list);
+    }
+
 
 
 

@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface CategoryService extends IService<Category> {
     public void remove(Long id);
-    public R<List<Category>> list(Category category);
+    public List<Category> listCategories(Category category);
 }

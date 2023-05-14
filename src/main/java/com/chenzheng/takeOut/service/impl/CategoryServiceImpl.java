@@ -45,13 +45,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
-    public R<List<Category>> list(Category category) {
+    public List<Category> listCategories(Category category) {
+        //条件构造器
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(null != category,Category::getType,category.getType());
+        //添加条件
+        queryWrapper.eq(category.getType() != null, Category::getType, category.getType());
+        //添加排序条件
         queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
-        List<Category> list = this.list(queryWrapper);
-        return R.success(list);
+
+        //返回查询结果
+        return this.list(queryWrapper);
     }
+
 
 
 }
