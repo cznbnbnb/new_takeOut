@@ -5,6 +5,8 @@ import com.chenzheng.takeOut.entity.ShoppingCart;
 
 
 public interface ShoppingCartService extends IService<ShoppingCart> {
+    ShoppingCart addCartItem(ShoppingCart shoppingCart);
+    ShoppingCart subCartItem(ShoppingCart shoppingCart);
 }
 
 

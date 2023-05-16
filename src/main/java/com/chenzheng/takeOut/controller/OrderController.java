@@ -25,16 +25,12 @@ public class OrderController {
      * 订单显示
      * @param page
      * @param pageSize
-     * @param id
      * @return
      */
-    @GetMapping("/page")
-    public R<Page> page(int page, int pageSize, String id){
-        log.info("page = {},pageSize = {},id = {}",page,pageSize,id);
-        Page<Orders> pageInfo = new Page(page,pageSize);
-        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotEmpty(id),Orders::getId,id);
-        orderService.page(pageInfo,queryWrapper);
-        return R.success(pageInfo);
+    @GetMapping("/userPage")
+    public R<Page<Orders>> getUserOrdersPage(@RequestParam("page") int page, @RequestParam("pageSize") int pageSize) {
+        Page<Orders> orderPage = orderService.getUserOrdersPage(page, pageSize);
+        return R.success(orderPage);
     }
+
 }
